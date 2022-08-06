@@ -1,5 +1,5 @@
 {
-	"name": "typescript-template",
+	"name": "rotmg-blog-webhook",
 	"version": "1.0.0",
 	"description": "",
 	"main": "index.js",
@@ -9,10 +9,11 @@
 		"start": "node ./dist/index.js"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "tommmyliu",
 	"license": "",
 	"dependencies": {
-		"discord.js": "^14.1.2",
+		"@discordjs/rest": "^1.0.1",
+		"discord-api-types": "^0.37.1",
 		"dotenv": "^16.0.1",
 		"httpie": "^2.0.0-next.13",
 		"node-html-parser": "^5.3.3",

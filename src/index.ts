@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
-import { APIEmbed, hideLinkEmbed, WebhookClient } from 'discord.js';
+import { REST } from '@discordjs/rest';
+import { APIEmbed, Routes } from 'discord-api-types/v10';
 import { get } from 'httpie';
 import { parse } from 'node-html-parser';
 import { blogUrl, userAgent } from './constants.js';
@@ -8,10 +9,7 @@ import { logger } from './logger.js';
 
 let lastArticleId: number | undefined;
 
-const client = new WebhookClient({
-	id: process.env.WEBHOOK_ID!,
-	token: process.env.WEBHOOK_TOKEN!,
-});
+const rest = new REST({ version: '10' }).setToken(process.env.WEBHOOK_TOKEN!);
 
 async function check() {
 	logger.info('checking blog');
@@ -36,7 +34,7 @@ async function check() {
 		const articleId = latestArticle.childNodes[1].id as string;
 		const articleId_ = parseInt(articleId.split('-')[1], 10);
 
-		if (lastArticleId === articleId_) return logger.info('no new article');
+		if (lastArticleId === articleId_) return;
 
 		const articleUrl = `https://remaster.realmofthemadgod.com/?p=${articleId_}`;
 		const req = await get(articleUrl, {
@@ -85,7 +83,13 @@ async function check() {
 		}
 
 		embed.description = articleDescription.join('\n\n');
-		await client.send({ content: `${hideLinkEmbed(articleUrl)}`, embeds: [embed] });
+
+		void rest.post(Routes.webhook(process.env.WEBHOOK_ID!, process.env.WEBHOOK_TOKEN), {
+			body: {
+				content: `<${articleUrl}>`,
+				embeds: [embed],
+			},
+		});
 
 		logger.info(`webhook sent for article ${articleId_}`);
 		lastArticleId = articleId_;
